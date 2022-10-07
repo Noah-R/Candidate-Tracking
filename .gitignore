@@ -1,2 +1,4 @@
 fec_key.txt
 newsdata_key.txt
+*.csv
+*.json
