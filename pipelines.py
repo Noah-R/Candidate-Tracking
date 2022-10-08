@@ -77,7 +77,7 @@ def getPacsAndMemberships(candidates, fec_key):
 
 def getCandidateFilings(candidates, fec_key):
     rows = []
-    cols = ["candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
+    cols = ["file_number", "candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     rows.append(cols)
     for candidate in candidates:
         page = 1
@@ -99,7 +99,7 @@ def getCandidateFilings(candidates, fec_key):
 
 def getPacFilings(pacs, fec_key):
     rows = []
-    cols = ["committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
+    cols = ["file_number", "committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     rows.append(cols)
     for pac in pacs:
         
@@ -143,18 +143,19 @@ def getNews(candidates, newsdata_key):
 
     writeFileToS3("news.csv", rows)
 
-fec_key = open("fec_key.txt").read()
-newsdata_key = open("newsdata_key.txt").read()
+def handler(event, context):
+    fec_key = open("fec_key.txt").read()
+    newsdata_key = open("newsdata_key.txt").read()
 
-candidates = [
-    {"name": "John Fetterman", "candidate_id": "S6PA00274"},
-    {"name": "Mehmet Oz", "candidate_id": "S2PA00638"}
-]
+    candidates = [
+        {"name": "John Fetterman", "candidate_id": "S6PA00274"},
+        {"name": "Mehmet Oz", "candidate_id": "S2PA00638"}
+    ]
 
-#candidates = [{"name": "Joe Biden", "candidate_id": "P80000722"}]
+    #candidates = [{"name": "Joe Biden", "candidate_id": "P80000722"}]
 
-getCandidates(candidates, fec_key)
-pacs = getPacsAndMemberships(candidates, fec_key)
-getCandidateFilings(candidates, fec_key)
-getPacFilings(pacs, fec_key)
-getNews(candidates, newsdata_key)
+    getCandidates(candidates, fec_key)
+    pacs = getPacsAndMemberships(candidates, fec_key)
+    getCandidateFilings(candidates, fec_key)
+    getPacFilings(pacs, fec_key)
+    getNews(candidates, newsdata_key)
