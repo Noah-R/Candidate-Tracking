@@ -1,6 +1,8 @@
 import urllib3
+import boto3
 import csv
 import json
+from io import StringIO
 
 def request(url):
     http = urllib3.PoolManager()
@@ -9,12 +11,21 @@ def request(url):
 
 
 def writeCSV(filename, data):
-    f = open(filename, 'w')
+    f = open(filename, 'w', newline='')
     writer = csv.writer(f)
     for row in data:
         writer.writerow(row)
     f.close()
 
+def writeFileToS3(filename, data):
+    si = StringIO()
+    writer = csv.writer(si)
+    for row in data:
+        writer.writerow(row)
+    encoded_contents = si.getvalue().encode("utf-8")
+
+    s3 = boto3.resource("s3")
+    s3.Bucket("shifty-guy").put_object(Key=filename, Body=encoded_contents)
 
 def getCandidates(candidates, fec_key):
     rows = []
@@ -28,7 +39,7 @@ def getCandidates(candidates, fec_key):
             row.append(data[col])
         rows.append(row)
 
-    writeCSV("candidates.csv", rows)
+    writeFileToS3("candidates.csv", rows)
 
 
 def getPacsAndMemberships(candidates, fec_key):
@@ -58,8 +69,8 @@ def getPacsAndMemberships(candidates, fec_key):
                 for member in datarow["candidate_ids"]:
                     joinrows.append([member, datarow["committee_id"]])
 
-    writeCSV("pacs.csv", rows)
-    writeCSV("pac_memberships.csv", joinrows)
+    writeFileToS3("pacs.csv", rows)
+    writeFileToS3("pac_memberships.csv", joinrows)
 
     return pacs
 
@@ -83,7 +94,7 @@ def getCandidateFilings(candidates, fec_key):
                     row.append(datarow[col])
                 rows.append(row)
 
-    writeCSV("candidate_filings.csv", rows)
+    writeFileToS3("candidate_filings.csv", rows)
 
 
 def getPacFilings(pacs, fec_key):
@@ -106,7 +117,7 @@ def getPacFilings(pacs, fec_key):
                     row.append(datarow[col])
                 rows.append(row)
 
-    writeCSV("pac_filings.csv", rows)
+    writeFileToS3("pac_filings.csv", rows)
 
 
 def getNews(candidates, newsdata_key):
@@ -114,9 +125,11 @@ def getNews(candidates, newsdata_key):
     cols = ["news_id", "candidate_id", "title", "link", "pubDate", "source_id"]
     rows.append(cols)
     for candidate in candidates:
-        nextpage = 1
-        while(nextpage != None):
-            url = "https://newsdata.io/api/1/news?apikey="+newsdata_key+"&q="+candidate["name"].replace(" ", "%20")+"&country=us&language=en&page="+str(nextpage)
+        nextpage = 0
+        while(nextpage != None and nextpage < (200/len(candidates))):
+            url = "https://newsdata.io/api/1/news?apikey="+newsdata_key+"&q="+candidate["name"].replace(" ", "%20")+"&country=us&language=en"
+            if(nextpage > 0):
+                url += "&page="+str(nextpage)
             resp = request(url)
             data = resp["results"]
             nextpage = resp["nextPage"]
@@ -128,7 +141,7 @@ def getNews(candidates, newsdata_key):
                     row.append(datarow[col])
                 rows.append(row)
 
-    writeCSV("news.csv", rows)
+    writeFileToS3("news.csv", rows)
 
 fec_key = open("fec_key.txt").read()
 newsdata_key = open("newsdata_key.txt").read()
