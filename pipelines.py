@@ -38,19 +38,25 @@ def getPacsAndMemberships(candidates, fec_key):
     cols = ["committee_id", "name", "affiliated_committee_name", "party", "candidate_ids", "website", "committee_type_full", "state", "designation_full", "first_file_date"]
     rows.append(cols)
     for candidate in candidates:
-        url = "https://api.open.fec.gov/v1/candidate/"+candidate["candidate_id"]+"/committees/?api_key="+fec_key
-        data = request(url)["results"]
-        for datarow in data:
-            row = []
-            for col in cols:
-                row.append(datarow[col])
-            rows.append(row)
+        page = 1
+        pages = 1
+        while(page <= pages):
+            url = "https://api.open.fec.gov/v1/candidate/"+candidate["candidate_id"]+"/committees/?api_key="+fec_key+"&page="+str(page)
+            resp = request(url)
+            data = resp["results"]
+            pages = resp["pagination"]["pages"]
+            page += 1
+            for datarow in data:
+                row = []
+                for col in cols:
+                    row.append(datarow[col])
+                rows.append(row)
 
-            if(datarow["committee_id"] not in pacs):
-                pacs.append(datarow["committee_id"])
+                if(datarow["committee_id"] not in pacs):
+                    pacs.append(datarow["committee_id"])
 
-            for member in datarow["candidate_ids"]:
-                joinrows.append([member, datarow["committee_id"]])
+                for member in datarow["candidate_ids"]:
+                    joinrows.append([member, datarow["committee_id"]])
 
     writeCSV("pacs.csv", rows)
     writeCSV("pac_memberships.csv", joinrows)
@@ -63,13 +69,19 @@ def getCandidateFilings(candidates, fec_key):
     cols = ["candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     rows.append(cols)
     for candidate in candidates:
-        url = "https://api.open.fec.gov/v1/candidate/"+candidate["candidate_id"]+"/filings/?api_key="+fec_key
-        data = request(url)["results"]
-        for datarow in data:
-            row = []
-            for col in cols:
-                row.append(datarow[col])
-            rows.append(row)
+        page = 1
+        pages = 1
+        while(page <= pages):
+            url = "https://api.open.fec.gov/v1/candidate/"+candidate["candidate_id"]+"/filings/?api_key="+fec_key+"&page="+str(page)
+            resp = request(url)
+            data = resp["results"]
+            pages = resp["pagination"]["pages"]
+            page += 1
+            for datarow in data:
+                row = []
+                for col in cols:
+                    row.append(datarow[col])
+                rows.append(row)
 
     writeCSV("candidate_filings.csv", rows)
 
@@ -79,13 +91,20 @@ def getPacFilings(pacs, fec_key):
     cols = ["committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     rows.append(cols)
     for pac in pacs:
-        url = "https://api.open.fec.gov/v1/committee/"+pac+"/filings/?api_key="+fec_key
-        data = request(url)["results"]
-        for datarow in data:
-            row = []
-            for col in cols:
-                row.append(datarow[col])
-            rows.append(row)
+        
+        page = 1
+        pages = 1
+        while(page <= pages):
+            url = "https://api.open.fec.gov/v1/committee/"+pac+"/filings/?api_key="+fec_key+"&page="+str(page)
+            resp = request(url)
+            data = resp["results"]
+            pages = resp["pagination"]["pages"]
+            page += 1
+            for datarow in data:
+                row = []
+                for col in cols:
+                    row.append(datarow[col])
+                rows.append(row)
 
     writeCSV("pac_filings.csv", rows)
 
@@ -95,27 +114,34 @@ def getNews(candidates, newsdata_key):
     cols = ["news_id", "candidate_id", "title", "link", "pubDate", "source_id"]
     rows.append(cols)
     for candidate in candidates:
-        url = "https://newsdata.io/api/1/news?apikey="+newsdata_key+"&q="+candidate["name"].replace(" ", "%20")+"&country=us&language=en"
-        data = request(url)["results"]
-        for datarow in data:
-            row = []
-            row.append(candidate["name"]+" "+datarow["source_id"]+" "+datarow["pubDate"])
-            row.append(candidate["candidate_id"])
-            for col in cols[2:]:
-                row.append(datarow[col])
-            rows.append(row)
+        nextpage = 1
+        while(nextpage != None):
+            url = "https://newsdata.io/api/1/news?apikey="+newsdata_key+"&q="+candidate["name"].replace(" ", "%20")+"&country=us&language=en&page="+str(nextpage)
+            resp = request(url)
+            data = resp["results"]
+            nextpage = resp["nextPage"]
+            for datarow in data:
+                row = []
+                row.append(candidate["name"]+" "+datarow["source_id"]+" "+datarow["pubDate"])
+                row.append(candidate["candidate_id"])
+                for col in cols[2:]:
+                    row.append(datarow[col])
+                rows.append(row)
 
     writeCSV("news.csv", rows)
 
 fec_key = open("fec_key.txt").read()
 newsdata_key = open("newsdata_key.txt").read()
+
 candidates = [
     {"name": "John Fetterman", "candidate_id": "S6PA00274"},
     {"name": "Mehmet Oz", "candidate_id": "S2PA00638"}
 ]
 
-#getCandidates(candidates, fec_key)
-#pacs = getPacsAndMemberships(candidates, fec_key)
-#getCandidateFilings(candidates, fec_key)
-#getPacFilings(pacs, fec_key)
+#candidates = [{"name": "Joe Biden", "candidate_id": "P80000722"}]
+
+getCandidates(candidates, fec_key)
+pacs = getPacsAndMemberships(candidates, fec_key)
+getCandidateFilings(candidates, fec_key)
+getPacFilings(pacs, fec_key)
 getNews(candidates, newsdata_key)
