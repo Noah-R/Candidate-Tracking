@@ -20,7 +20,7 @@ def writeCSV(filename, data):
 def writeFileToS3(filename, data):
     si = StringIO()
     writer = csv.writer(si)
-    for row in data:
+    for row in data[1:]:
         writer.writerow(row)
     encoded_contents = si.getvalue().encode("utf-8")
 
