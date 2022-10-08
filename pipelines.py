@@ -20,7 +20,7 @@ def writeCSV(filename, data):
 def writeFileToS3(filename, data):
     si = StringIO()
     writer = csv.writer(si)
-    for row in data[1:]:
+    for row in data:
         writer.writerow(row)
     encoded_contents = si.getvalue().encode("utf-8")
 
@@ -30,7 +30,7 @@ def writeFileToS3(filename, data):
 def getCandidates(candidates, fec_key):
     rows = []
     cols = ["candidate_id", "name", "state", "party", "office", "incumbent_challenge"]
-    rows.append(cols)
+    
     for candidate in candidates:
         url = "https://api.open.fec.gov/v1/candidate/"+candidate["candidate_id"]+"/?api_key="+fec_key
         data = request(url)["results"][0]
@@ -45,9 +45,10 @@ def getCandidates(candidates, fec_key):
 def getPacsAndMemberships(candidates, fec_key):
     pacs = []
     rows = []
-    joinrows = [["candidate_id", "committee_id"]]
+    joinrows = []
     cols = ["committee_id", "name", "affiliated_committee_name", "party", "candidate_ids", "website", "committee_type_full", "state", "designation_full", "first_file_date"]
-    rows.append(cols)
+    joincols = ["candidate_id", "committee_id"]
+    
     for candidate in candidates:
         page = 1
         pages = 1
@@ -78,7 +79,7 @@ def getPacsAndMemberships(candidates, fec_key):
 def getCandidateFilings(candidates, fec_key):
     rows = []
     cols = ["file_number", "candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
-    rows.append(cols)
+    
     for candidate in candidates:
         page = 1
         pages = 1
@@ -100,7 +101,7 @@ def getCandidateFilings(candidates, fec_key):
 def getPacFilings(pacs, fec_key):
     rows = []
     cols = ["file_number", "committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
-    rows.append(cols)
+    
     for pac in pacs:
         
         page = 1
@@ -123,7 +124,7 @@ def getPacFilings(pacs, fec_key):
 def getNews(candidates, newsdata_key):
     rows = []
     cols = ["news_id", "candidate_id", "title", "link", "pubDate", "source_id"]
-    rows.append(cols)
+    
     for candidate in candidates:
         nextpage = 0
         while(nextpage != None and nextpage < (200/len(candidates))):
