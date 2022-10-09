@@ -78,7 +78,7 @@ def getPacsAndMemberships(candidates, fec_key):
 
 def getCandidateFilings(candidates, fec_key):
     rows = []
-    cols = ["candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
+    cols = ["candidate_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "receipt_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     
     for candidate in candidates:
         page = 1
@@ -92,7 +92,7 @@ def getCandidateFilings(candidates, fec_key):
             for datarow in data:
                 row = []
                 for col in cols:
-                    if("coverage" in col and type(datarow[col])==str):
+                    if("date" in col and type(datarow[col])==str):
                         datarow[col] = datarow[col].replace("T", " ")
                     row.append(datarow[col])
                 rows.append(row)
@@ -102,7 +102,7 @@ def getCandidateFilings(candidates, fec_key):
 
 def getPacFilings(pacs, fec_key):
     rows = []
-    cols = ["committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
+    cols = ["committee_id", "report_type_full", "document_description", "coverage_start_date", "coverage_end_date", "receipt_date", "csv_url", "pdf_url", "html_url", "total_disbursements", "total_receipts", "debts_owed_by_committee", "debts_owed_to_committee", "cash_on_hand_beginning_period", "cash_on_hand_end_period", "primary_general_indicator"]
     
     for pac in pacs:
         
@@ -117,7 +117,7 @@ def getPacFilings(pacs, fec_key):
             for datarow in data:
                 row = []
                 for col in cols:
-                    if("coverage" in col and type(datarow[col])==str):
+                    if("date" in col and type(datarow[col])==str):
                         datarow[col] = datarow[col].replace("T", " ")
                     row.append(datarow[col])
                 rows.append(row)
