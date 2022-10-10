@@ -154,7 +154,11 @@ def handler(event, context):
 
     candidates = [
         {"name": "John Fetterman", "candidate_id": "S6PA00274"},
-        {"name": "Mehmet Oz", "candidate_id": "S2PA00638"}
+        {"name": "Mehmet Oz", "candidate_id": "S2PA00638"},
+        {"name": "Catherine Cortez Masto", "candidate_id": "S6NV00200"},
+        {"name": "Adam Laxalt", "candidate_id": "S2NV00324"},
+        {"name": "Mandela Barnes", "candidate_id": "S2WI00441"},
+        {"name": "Ron Johnson", "candidate_id": "S0WI00197"}
     ]
 
     #candidates = [{"name": "Joe Biden", "candidate_id": "P80000722"}]
